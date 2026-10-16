@@ -124,6 +124,12 @@ public function enviarCfdiCorreo($id, $correo, $correo_emisor = '', $subject =''
 
         $respuesta = curl_exec($ch);
         $httpCode = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        if ($httpCode === 403) {
+            error_log(
+                'Facturama 403: ' .
+                substr((string) $respuesta, 0, 1000)
+            );
+        }
         $contentType = curl_getinfo($ch, CURLINFO_CONTENT_TYPE) ?: 'application/octet-stream';
         $error = curl_error($ch);
 
