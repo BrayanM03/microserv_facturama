@@ -147,7 +147,8 @@ public function enviarCfdiCorreo($id, $correo, $correo_emisor = '', $subject =''
             'ok' => $httpCode >= 200 && $httpCode < 300,
             'status' => $httpCode,
             'data' => $data,
-            'contentType' => $contentType
+            'contentType' => $contentType,
+            'respuesta' => $respuesta
         ];
     }
 }
