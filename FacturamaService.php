@@ -9,7 +9,7 @@ class FacturamaService {
           require_once __DIR__ . '/env.php';
     cargarEnv();
 
-        $this->baseUrl = rtrim(getenv('FACTURAMA_API_URL') ?: 'https://www.api.facturama.com.mx', '/');
+        $this->baseUrl = rtrim(getenv('FACTURAMA_API_URL') ?: 'https://apisandbox.facturama.mx', '/');
         $this->usuario = getenv('FACTURAMA_USER') ?: '';
         $this->password = getenv('FACTURAMA_PASSWORD') ?: '';
     }
@@ -56,7 +56,7 @@ class FacturamaService {
 
     public function eliminarCsd($rfc) {
         return $this->request('DELETE', '/api-lite/csds/' . rawurlencode($rfc));
-    }
+    } 
 
     public function obtenerCfdi($id) {
         return $this->request('GET', '/api-lite/cfdis/' . rawurlencode($id));

@@ -18,9 +18,14 @@ $clientId = trim((string)($input['client_id'] ?? ''));
 $issuerId = filter_var($input['issuer_id'] ?? null, FILTER_VALIDATE_INT);
 $folio    = trim((string)($input['folio'] ?? ''));
 $date     = trim((string)($input['date'] ?? ''));
+$consulta_rapida = filter_var($input['quick'] ?? false, FILTER_VALIDATE_BOOLEAN);
+
+if($consulta_rapida) {
+   
+}
 
 if ($clientId === '' || strlen($clientId) > 100 || !preg_match('/^[A-Za-z0-9._:-]+$/', $clientId)
-    || !$issuerId || $issuerId < 1 || $folio === '' || $date === '') {
+    || !$issuerId || $issuerId < 1 || $folio === '' || (!$consulta_rapida && $date === '')) {
     http_response_code(400);
     echo json_encode(['estatus' => false, 'mensaje' => 'Envía client_id, issuer_id, folio y date.'], JSON_UNESCAPED_UNICODE);
     exit;
@@ -49,10 +54,16 @@ try {
         // 1) Folio exacto (keyword es búsqueda amplia)
         if ((string)($cfdi['Folio'] ?? '') !== $folio) continue;
         // 2) Misma Date que se guardó antes de timbrar
-        if (substr((string)($cfdi['Date'] ?? ''), 0, 19) !== substr($date, 0, 19)) continue;
+         if (!$consulta_rapida
+         && substr((string)($cfdi['Date'] ?? ''), 0, 19) !== substr($date, 0, 19)) continue;
         // 3) Mismo emisor, si el listado trae ese dato (verifica el nombre del campo en sandbox)
         $rfcEmisor = $cfdi['IssuerRfc'] ?? ($cfdi['Issuer']['Rfc'] ?? null);
         if ($rfcEmisor !== null && strcasecmp((string)$rfcEmisor, (string)$emisor['issuer_rfc']) !== 0) continue;
+
+        // Una factura ya cancelada en SAT no debe bloquear la cancelación de la venta
+        // (verifica en sandbox el nombre/valor real del campo de estatus)
+        if (strcasecmp((string)($cfdi['Status'] ?? ''), 'canceled') === 0) continue;
+
 
         $encontrado = [
             'Id' => $cfdi['Id'] ?? null,

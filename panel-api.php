@@ -195,6 +195,7 @@ if ($accion === 'saveIssuer') {
             responderJson(422, ['error' => 'El archivo ' . $archivo . ' debe ser .' . $extension . ' y pesar hasta 2 MB.']);
         }
     }
+
     $certificado = file_get_contents($_FILES['certificate']['tmp_name']);
     $llave = file_get_contents($_FILES['privateKey']['tmp_name']);
     if ($certificado === false || $llave === false) {
@@ -206,9 +207,10 @@ if ($accion === 'saveIssuer') {
         'PrivateKey' => base64_encode($llave),
         'PrivateKeyPassword' => $contrasena
     ];
+
     $resultado = $facturama->guardarCsd($rfc, $datos, $actualizar);
     if (!$resultado['ok']) {
-        responderJson($resultado['status'] ?: 502, ['error' => $resultado['data']['Message'] ?? 'Facturama no pudo guardar el CSD.']);
+        responderJson($resultado['status'] ?: 502, ['error' => $resultado['data']['Message'] ?? 'Facturama no pudo guardar el CSD.', 'resultado' => $resultado, 'datos'=> $datos]);
     }
     responderJson(200, ['ok' => true, 'message' => $actualizar ? 'CSD actualizado.' : 'CSD registrado.']);
 }
@@ -287,7 +289,7 @@ header('Content-Length: ' . strlen($contenido));
 header('Cache-Control: no-store');
 echo $contenido;
 exit;
-}
+} 
 
 if ($accion === 'cancel') {
     $id = trim((string) ($entrada['id'] ?? ''));
